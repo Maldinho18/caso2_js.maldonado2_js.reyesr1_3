@@ -3,6 +3,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -128,4 +129,36 @@ public class CasoMemoriaVirtual {
     public static void simularPagina(String nombreArchivo, int numeroMarcos){
         //CODIGO
     }
+
+    public static class LectorReferencia implements Runnable {
+
+        private static MemoriaVirtual memoria;
+        private static LinkedList<Referencia> referenciasSimuladas;
+
+        public LectorReferencia(MemoriaVirtual memoria, LinkedList<Referencia> referenciasSimuladas) {
+            LectorReferencia.memoria = memoria;
+            LectorReferencia.referenciasSimuladas = referenciasSimuladas;
+        }
+
+        @Override
+        public void run() {
+            int contador = 0;
+
+            for (Referencia referencia : referenciasSimuladas) {
+                memoria.accederPagina(referencia.getPagina()); 
+                contador++;
+
+                if (contador % 10000 == 0) {
+                    try {
+                        Thread.sleep(1); 
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+
+
 }
