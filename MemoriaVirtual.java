@@ -73,7 +73,7 @@ public class MemoriaVirtual {
         return hits;
     }
 
-    public void Resultados(){
+    public void imprimirResultados(){
         int total = misses + hits;
         double porcentajeMisses = (double)misses / total * 100;
         double porcentajeHits = (double)hits / total * 100;

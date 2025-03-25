@@ -5,7 +5,7 @@ public class Referencia {
     private int pagina;
     private int offset;
 
-    public Referencia (String descriptor, String accion, int pagina, int offset) {
+    public Referencia (String descriptor, int pagina, int offset, String accion) {
         this.descriptor = descriptor;
         this.accion = accion;
         this.pagina = pagina;
