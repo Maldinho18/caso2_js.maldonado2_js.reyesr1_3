@@ -159,6 +159,19 @@ public class CasoMemoriaVirtual {
         }
     }
 
+    public static class ActualizadorEstado implements Runnable{
 
+        public void run(){
+            while(!simulacionTerminada.get()){
+                momoriaVirtual.reiniciarBits();
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
 
 }
