@@ -1,6 +1,5 @@
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -39,6 +38,24 @@ public class MemoriaVirtual {
 
     public synchronized void reemplazarPagina(){
 
+        Integer paginaEliminar = null;
+
+        for(Integer pagina: listaPaginas){
+            if(!bitReferencia.get(pagina)){
+                paginaEliminar = pagina;
+                break;
+            }
+        }
+
+        if(paginaEliminar == null){
+            for(Integer pagina: listaPaginas){
+                bitReferencia.put(pagina, false);
+            }
+            paginaEliminar = listaPaginas.getFirst();
+        }
+        listaPaginas.remove(paginaEliminar);
+        bitReferencia.remove(paginaEliminar);
+        /* 
         Iterator<Integer> iterador = listaPaginas.iterator();
 
         while (iterador.hasNext()){
@@ -53,7 +70,9 @@ public class MemoriaVirtual {
         }
         int paginaAEliminar = listaPaginas.removeFirst();
         bitReferencia.remove(paginaAEliminar);
+        */
     }
+        
 
     public synchronized void reiniciarBits(){
         for (Integer pagina : bitReferencia.keySet()){
@@ -75,10 +94,14 @@ public class MemoriaVirtual {
 
     public void imprimirResultados(){
         int total = misses + hits;
+        if(total == 0){
+            System.out.println("No se han realizado referencias a memoria");
+            return;
+        }
         double porcentajeMisses = (double)misses / total * 100;
         double porcentajeHits = (double)hits / total * 100;
         System.out.println("Total referencias a memoria: " + total);
-        System.out.println("Misses: " + misses + " (" + porcentajeMisses + "%)");
-        System.out.println("Hits: " + hits + " (" + porcentajeHits + "%)");
+        System.out.println("Misses: " + misses + " (" + String.format("%.2f", porcentajeMisses) + "%)");
+        System.out.println("Hits: " + hits + " (" + String.format("%.2f", porcentajeHits) + "%)");
     }
 }

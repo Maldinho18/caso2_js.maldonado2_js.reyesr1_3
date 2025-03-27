@@ -25,4 +25,9 @@ public class Referencia {
         return accion;
     }
 
+    @Override
+    public String toString() {
+        return descriptor + "," + pagina + "," + offset + "," + accion;
+    }
+
 }

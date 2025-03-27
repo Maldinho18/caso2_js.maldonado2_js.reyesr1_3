@@ -1,7 +1,5 @@
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,9 +8,9 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.imageio.ImageIO;
 
 public class CasoMemoriaVirtual {
+
     static final long TiempoHits = 50;
     static final long TiempoFallo = 10;
     static List<Referencia> referenciasSimuladas;
@@ -47,14 +45,9 @@ public class CasoMemoriaVirtual {
 
     public static void generarArchivoReferencias(String nombreArchivo, int tamanoPagina) {
         try {
-            BufferedImage img = ImageIO.read(new File(nombreArchivo));
-            if (img == null) {
-                System.out.println("No se pudo leer la imagen");
-                return;
-            }
-            int NF = img.getHeight();
-            int NC = img.getWidth();
-
+            Imagen img = new Imagen(nombreArchivo);
+            int NF = img.alto;
+            int NC = img.ancho;
             int tamanoImagen = NF * NC * 3;
             int tamanoRTA = NF * NC * 3;
             int tamanoFiltro = 3 * 3 * 4;
