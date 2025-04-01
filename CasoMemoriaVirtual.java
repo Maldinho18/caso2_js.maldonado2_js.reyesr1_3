@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CasoMemoriaVirtual {
 
     static final long TiempoHits = 50;
-    static final long TiempoFallo = 10;
+    static final long TiempoFallo = 10_000_000;
     static List<Referencia> referenciasSimuladas;
     static MemoriaVirtual memoriaVirtual;
     static AtomicBoolean simulacionTerminada = new AtomicBoolean(false);
@@ -217,7 +217,7 @@ public class CasoMemoriaVirtual {
             e.printStackTrace();
         }
         memoriaVirtual.imprimirResultados();
-        long tiempoTotal = memoriaVirtual.getHits() * TiempoHits + memoriaVirtual.getMisses() * (TiempoFallo * 1_000_000);
+        long tiempoTotal = memoriaVirtual.getHits() * TiempoHits + memoriaVirtual.getMisses() * TiempoFallo;
         System.out.println("Tiempo total: " + tiempoTotal + " ns");
     }
 
