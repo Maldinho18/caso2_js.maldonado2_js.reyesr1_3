@@ -117,7 +117,13 @@ public class CasoMemoriaVirtual {
     }
 
     public static Referencia crearReferencia(String nombreMatriz, int fila, int col, String componente, int baseOffset, int tamanoPagina, int NF, int NC, int tamanoImagen, int tamanoFiltroX, int tamanoFiltroY, boolean esE) {
-        int tamanoElemento = (nombreMatriz.equals("Imagen") || nombreMatriz.equals("Rta")) ? 1 : 4;
+        int tamanoElemento; 
+        if (nombreMatriz.equals("Imagen") || nombreMatriz.equals("Rta")) {
+            tamanoElemento = 1;
+        }  else {
+            tamanoElemento = 4; 
+        }
+
         int indexLocal = 0;
         if (nombreMatriz.equals("Imagen") || nombreMatriz.equals("Rta")) {
             int canal = 0;
@@ -166,8 +172,37 @@ public class CasoMemoriaVirtual {
             return;
         }
 
-        Thread lector = new Thread(new LectorReferencia(memoriaVirtual, referenciasSimuladas));
-        Thread actualizador = new Thread(new ActualizadorEstado(memoriaVirtual, simulacionTerminada));
+        simulacionTerminada.set(false);
+
+        Thread lector = new Thread(() -> {
+            int contador = 0;
+            for (Referencia ref : referenciasSimuladas) {
+                memoriaVirtual.accederPagina(ref.getPagina());
+                contador++;
+                if (contador % 10000 == 0) {
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            simulacionTerminada.set(true);
+        });
+
+        Thread actualizador = new Thread(() -> {
+            while (!simulacionTerminada.get()) {
+                synchronized (memoriaVirtual){
+                    memoriaVirtual.reiniciarBits();
+                }
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         lector.start();
         actualizador.start();
 
@@ -176,7 +211,6 @@ public class CasoMemoriaVirtual {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        simulacionTerminada.set(true);
         try {
             actualizador.join();
         } catch (InterruptedException e) {
@@ -227,7 +261,9 @@ public class CasoMemoriaVirtual {
 
         public void run(){
             while(!simulacionTerminada.get()){
-                memoriaVirtual.reiniciarBits();
+                synchronized (memoriaVirtual){
+                    memoriaVirtual.reiniciarBits();
+                }
                 try {
                     Thread.sleep(1);
                 } catch (InterruptedException e) {

@@ -36,48 +36,30 @@ public class MemoriaVirtual {
         }
     }
 
+    private Map<Integer, Boolean> bitReferenciaA = new HashMap<>();
+
     public synchronized void reemplazarPagina(){
-
         Integer paginaEliminar = null;
-
         for(Integer pagina: listaPaginas){
-            if(!bitReferencia.get(pagina)){
+            if(!bitReferenciaA.getOrDefault(pagina, false)){
                 paginaEliminar = pagina;
                 break;
             }
         }
 
-        if(paginaEliminar == null){
-            for(Integer pagina: listaPaginas){
-                bitReferencia.put(pagina, false);
-            }
+        if (paginaEliminar == null){
             paginaEliminar = listaPaginas.getFirst();
-        }
+        } 
+        
         listaPaginas.remove(paginaEliminar);
         bitReferencia.remove(paginaEliminar);
-        /* 
-        Iterator<Integer> iterador = listaPaginas.iterator();
-
-        while (iterador.hasNext()){
-            int pagina = iterador.next();
-            if (!bitReferencia.get(pagina)){
-                iterador.remove();
-                bitReferencia.remove(pagina);
-                return;
-            } else {
-                bitReferencia.put(pagina, false);
-            }
-        }
-        int paginaAEliminar = listaPaginas.removeFirst();
-        bitReferencia.remove(paginaAEliminar);
-        */
+        bitReferenciaA.remove(paginaEliminar);
     }
         
 
     public synchronized void reiniciarBits(){
-        for (Integer pagina : bitReferencia.keySet()){
-            bitReferencia.put(pagina, false);
-        }
+        bitReferenciaA = new HashMap<>(bitReferencia);
+        bitReferencia.replaceAll((k, v) -> false);
     }
 
     public int getTamanoPagina(){
