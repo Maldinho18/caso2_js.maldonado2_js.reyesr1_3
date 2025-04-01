@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CasoMemoriaVirtual {
 
     static final long TiempoHits = 50;
-    static final long TiempoFallo = 10_000_000;
+    static final long TiempoFallo = 10;
     static List<Referencia> referenciasSimuladas;
     static MemoriaVirtual memoriaVirtual;
     static AtomicBoolean simulacionTerminada = new AtomicBoolean(false);
@@ -117,15 +117,9 @@ public class CasoMemoriaVirtual {
     }
 
     public static Referencia crearReferencia(String nombreMatriz, int fila, int col, String componente, int baseOffset, int tamanoPagina, int NF, int NC, int tamanoImagen, int tamanoFiltroX, int tamanoFiltroY, boolean esE) {
-        int tamanoElemento; 
-        if (nombreMatriz.equals("Imagen") || nombreMatriz.equals("Rta")) {
-            tamanoElemento = 1;
-        }  else {
-            tamanoElemento = 4; 
-        }
-
+        int tamanoElemento = (nombreMatriz.equals("Imagen") || nombreMatriz.equals("RTA")) ? 1 : 4;
         int indexLocal = 0;
-        if (nombreMatriz.equals("Imagen") || nombreMatriz.equals("Rta")) {
+        if (nombreMatriz.equals("Imagen") || nombreMatriz.equals("RTA")) {
             int canal = 0;
             if (componente.equalsIgnoreCase("r")) canal = 0;
             else if (componente.equalsIgnoreCase("g")) canal = 1;
@@ -172,37 +166,8 @@ public class CasoMemoriaVirtual {
             return;
         }
 
-        simulacionTerminada.set(false);
-
-        Thread lector = new Thread(() -> {
-            int contador = 0;
-            for (Referencia ref : referenciasSimuladas) {
-                memoriaVirtual.accederPagina(ref.getPagina());
-                contador++;
-                if (contador % 10000 == 0) {
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            simulacionTerminada.set(true);
-        });
-
-        Thread actualizador = new Thread(() -> {
-            while (!simulacionTerminada.get()) {
-                synchronized (memoriaVirtual){
-                    memoriaVirtual.reiniciarBits();
-                }
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
+        Thread lector = new Thread(new LectorReferencia(memoriaVirtual, referenciasSimuladas));
+        Thread actualizador = new Thread(new ActualizadorEstado(memoriaVirtual, simulacionTerminada));
         lector.start();
         actualizador.start();
 
@@ -211,13 +176,14 @@ public class CasoMemoriaVirtual {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        simulacionTerminada.set(true);
         try {
             actualizador.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         memoriaVirtual.imprimirResultados();
-        long tiempoTotal = memoriaVirtual.getHits() * TiempoHits + memoriaVirtual.getMisses() * TiempoFallo;
+        long tiempoTotal = memoriaVirtual.getHits() * TiempoHits + memoriaVirtual.getMisses() * (TiempoFallo * 1_000_000);
         System.out.println("Tiempo total: " + tiempoTotal + " ns");
     }
 
@@ -261,9 +227,7 @@ public class CasoMemoriaVirtual {
 
         public void run(){
             while(!simulacionTerminada.get()){
-                synchronized (memoriaVirtual){
-                    memoriaVirtual.reiniciarBits();
-                }
+                memoriaVirtual.reiniciarBits();
                 try {
                     Thread.sleep(1);
                 } catch (InterruptedException e) {
